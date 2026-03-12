@@ -71,7 +71,7 @@ We ran the 1D HMC sampler targeting a standard normal distribution, $\mathcal{N}
     \label{fig:eps_025}
 \end{figure}
 
-The histogram matches the true standard normal density curve quite well. The measured sample mean was $-0.0243$ and the sample variance was $0.9987$, very close to the true values of $0$ and $1$, respectively. The overall acceptance rate was very high at $99.42\%$. This indicates that the moderate step size of $\epsilon = 0.25$ ensures the numerical leapfrog integration closely approximates the true energy-conserving Hamiltonian dynamics. Because total energy is nearly conserved throughout the trajectory, the Metropolis correction step almost always accepts the proposed states.
+The histogram matches the true standard normal density curve quite well. The measured sample mean was $-0.0078$ and the sample variance was $0.9654$, very close to the true values of $0$ and $1$, respectively. The overall acceptance rate was very high at $99.42\%$. This indicates that the moderate step size of $\epsilon = 0.25$ ensures the numerical leapfrog integration closely approximates the true energy-conserving Hamiltonian dynamics. Because total energy is nearly conserved throughout the trajectory, the Metropolis correction step almost always accepts the proposed states.
 
 \section{Question 3: HMC with Step Size $\epsilon = 0.8$}
 
@@ -84,7 +84,7 @@ Next, the experiment was modified by increasing the step size to $\epsilon = 0.8
     \label{fig:eps_08}
 \end{figure}
 
-With this larger step size, the overall acceptance rate dropped to $96.55\%$. The generated samples yielded a mean of $-0.0073$ and a variance of $0.9330$. The noticeable decrease in variance indicates a marginally poorer approximation of the target density, primarily due to integration error. 
+With this larger step size, the overall acceptance rate dropped to $95.78\%$. The generated samples yielded a mean of $0.0003$ and a variance of $0.9573$. The noticeable decrease in variance indicates a marginally poorer approximation of the target density, primarily due to integration error. 
 
 A larger leapfrog step size introduces larger discretization errors during the numerical integration of Hamiltonian dynamics. As a result, the Hamiltonian (total energy) is not conserved as accurately as with smaller steps. The Metropolis acceptance criterion corrects for these numerical errors by rejecting proposals that exhibit significantly different energies, which explains the lower acceptance rate and slightly skewed sample metrics.
 
@@ -111,7 +111,7 @@ Time-reversibility is achieved via perfectly symmetric half-steps of momentum in
 
 \section{Conclusion}
 
-Hamiltonian Monte Carlo represents a significant improvement over simple random-walk Metropolis-Hastings by utilizing gradient information and auxiliary momentum to propose new states. Our 1D implementation demonstrates that HMC can reliably and efficiently sample from a standard normal distribution. We observed that smaller leapfrog steps yield more accurate energy conservation and higher acceptance rates ($99.42\%$ at $\epsilon = 0.25$), whereas larger steps increase integration error and moderately reduce acceptance ($96.55\%$ at $\epsilon = 0.8$). Ultimately, HMC's use of Hamiltonian trajectories makes it a robust algorithm for navigating high-dimensional and strongly correlated probability spaces.
+Hamiltonian Monte Carlo represents a significant improvement over simple random-walk Metropolis-Hastings by utilizing gradient information and auxiliary momentum to propose new states. Our 1D implementation demonstrates that HMC can reliably and efficiently sample from a standard normal distribution. We observed that smaller leapfrog steps yield more accurate energy conservation and higher acceptance rates ($99.42\%$ at $\epsilon = 0.25$), whereas larger steps increase integration error and moderately reduce acceptance ($95.78\%$ at $\epsilon = 0.8$). Ultimately, HMC's use of Hamiltonian trajectories makes it a robust algorithm for navigating high-dimensional and strongly correlated probability spaces.
 
 \section*{Appendix: Python Source Code}
 % The code listing formatting is handled by the lstset block 

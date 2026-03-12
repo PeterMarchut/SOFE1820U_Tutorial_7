@@ -92,7 +92,7 @@ def hmc_sampler(mu, sigma, step_size, num_steps, num_samples, initial_q):
 
 def run_experiment(step_size, num_steps, num_samples, mu, sigma, suffix):
     """Helper to run the sampler, print statistics, and save samples."""
-    np.random.seed(42)
+    np.random.seed(100263058)
     initial_q = 0.0
     
     print(f"--- Experiment: Step Size (epsilon) = {step_size} ---")
