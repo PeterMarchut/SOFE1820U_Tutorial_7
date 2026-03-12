@@ -36,8 +36,8 @@
 \title{Tutorial 7 -- Hamiltonian Monte Carlo}
 
 \author{
-\IEEEauthorblockN{Peter Marchut}
-\IEEEauthorblockA{\textit{SOFE 4820U -- Modelling and Simulation} \\
+\IEEEauthorblockN{Peter Marchut and Daniel Jeon}
+\IEEEauthorblockA{\textit{SOFE 4820U - Modelling and Simulation} \\
 \textit{Ontario Tech University}\\
 Winter 2026}
 }
@@ -46,23 +46,15 @@ Winter 2026}
 
 \maketitle
 
-\begin{abstract}
-This report outlines the principles and implementation of Hamiltonian Monte Carlo (HMC). We discuss how HMC overcomes the limitations of standard Metropolis-Hastings in high-dimensional and strongly correlated spaces by leveraging Hamiltonian dynamics. A one-dimensional HMC sampler is implemented in Python and tested with different step sizes, demonstrating the trade-offs between step size and acceptance rate. The results show that carefully tuned leapfrog integration yields high acceptance rates while effectively exploring the target distribution.
-\end{abstract}
-
-\section{Introduction}
-
-Markov Chain Monte Carlo (MCMC) methods are essential for sampling from complex probability distributions. The standard Metropolis-Hastings (MH) algorithm relies on random walk proposals, which can be inefficient. Hamiltonian Monte Carlo (HMC) improves upon this by augmenting the parameter space with auxiliary momentum variables and simulating Hamiltonian dynamics to propose new states. This report answers the conceptual and practical questions regarding HMC as part of Tutorial 7.
-
 \section{Question 1: MH vs. HMC in High Dimensions}
 
-The standard Metropolis-Hastings (MH) algorithm typically makes local random-walk proposals. Because these proposals do not utilize the shape of the target distribution, they move blindly. In high-dimensional problems, most random directions point away from the typical set (the region of high probability mass). Consequently, to maintain a reasonable acceptance rate, the proposal step size must be kept very small. This causes consecutive states to remain very similar (high autocorrelation), meaning exploration of the target distribution becomes slow and inefficient. 
+The standard Metropolis-Hastings (MH) algorithm typically makes local random-walk proposals. These proposals move blind and randomly. To maintain a reasonable acceptance rate, the proposal step size must be kept very small. This causes consecutive states to remain very similar (high autocorrelation), meaning exploration of the target distribution becomes slow and inefficient.
 
-HMC addresses this by using gradient information of the target distribution, treating it as a potential energy surface. By simulating Hamiltonian dynamics with momentum, HMC follows informed trajectories that move efficiently along probability contours. This directed exploration reduces random walk behavior, allowing for longer moves across the state space while maintaining a high acceptance probability.
+HMC uses gradient information of the target distribution. By simulating Hamiltonian dynamics, HMC follows informed trajectories that move efficiently along probability boundaries. This directed exploration reduces random behavior, allowing for longer movements across the state space while maintaining a high acceptance probability.
 
 \section{Question 2: HMC with Step Size $\epsilon = 0.25$}
 
-We ran the 1D HMC sampler targeting a standard normal distribution, $\mathcal{N}(0,1)$, using a leapfrog step size of $\epsilon = 0.25$ and $L = 20$ leapfrog steps for 5000 iterations (after an initial burn-in period). The resulting histogram of samples compared to the true analytical density is shown in Fig.~\ref{fig:eps_025}.
+The 1D HMC sampler targeted a standard normal distribution, $\mathcal{N}(0,1)$, using a step size of $\epsilon = 0.25$ and $L = 20$ steps for 5000 iterations. The resulting histogram of samples compared to the true value is shown in Fig.~\ref{fig:eps_025}.
 
 \begin{figure}[htbp]
     \centering
@@ -71,7 +63,7 @@ We ran the 1D HMC sampler targeting a standard normal distribution, $\mathcal{N}
     \label{fig:eps_025}
 \end{figure}
 
-The histogram matches the true standard normal density curve quite well. The measured sample mean was $-0.0078$ and the sample variance was $0.9654$, very close to the true values of $0$ and $1$, respectively. The overall acceptance rate was very high at $99.42\%$. This indicates that the moderate step size of $\epsilon = 0.25$ ensures the numerical leapfrog integration closely approximates the true energy-conserving Hamiltonian dynamics. Because total energy is nearly conserved throughout the trajectory, the Metropolis correction step almost always accepts the proposed states.
+The histogram matches the true standard normal density curve quite well. The measured sample mean was $-0.0078$ and the sample variance was $0.9654$ which is close to the true values of $0$ and $1$ respectively. The overall acceptance rate was high at $99.42\%$. This indicates that the step size of $\epsilon = 0.25$ ensures the numerical integration closely approximates the true energy-conserving Hamiltonian dynamics. Total energy is nearly conserved throughout the movement and the Metropolis correction step almost always accepts the proposed states.
 
 \section{Question 3: HMC with Step Size $\epsilon = 0.8$}
 
@@ -90,34 +82,19 @@ A larger leapfrog step size introduces larger discretization errors during the n
 
 \section{Question 4: Strongly Correlated 2D Gaussian}
 
-Consider a 2D Gaussian distribution with strong correlation between the two variables, resulting in a narrow, diagonally elongated probability contour (see Fig.~\ref{fig:2d_demo}). 
+Standard MH struggles to sample from this specific distribution. An isotropic random-walk proposal will likely try to step outside the narrow high-probability region. This will lead to frequent rejections unless the step size is very small. However, if the step size is small to maintain high acceptance, the algorithm will only perform random-walk behavior in a local area and take a long time to traverse the length of the distribution. 
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\linewidth]{figures/optional_2d_demo.png}
-    \caption{Visualization of exploration strategies on a highly correlated 2D Gaussian distribution.}
-    \label{fig:2d_demo}
-\end{figure}
-
-Standard MH struggles to sample from this specific distribution. An isotropic random-walk proposal will likely attempt to step outside the narrow high-probability region, leading to frequent rejections unless the step size is exceedingly small. However, if the step size is small to maintain high acceptance, the algorithm will exhibit severe local random-walk behavior and take a correspondingly long time to traverse the length of the distribution. 
-
-HMC, on the other hand, evaluates the gradient of the log-probability. The gradient essentially pushes the trajectory back towards the center of the high-density valley while momentum allows the state to continue moving over long distances along the valley's length. In this way, HMC trajectories move far across the correlated dimensions efficiently without risking consistent rejection.
+HMC evaluates the gradient of the log-probability. The gradient pushes the trajectory back towards the center of the high-probability area, continuing to move over long distances along the region. THis results in HMC movements being more efficient without risking consistent rejection.
 
 \section{Question 5: Leapfrog Integration and Reversibility}
 
-In HMC, simulating continuous Hamiltonian dynamics requires a numerical integrator. The \textit{leapfrog} integrator is preferred because it is both volume-preserving and time-reversible, which are essential properties for the mathematical validity of the Metropolis-Hastings acceptance step. Furthermore, the leapfrog method is a symplectic integrator, meaning it is exceptionally numerically stable over long trajectories and approximately preserves the total Hamiltonian (energy) rather than causing it to diverge over time. This stability keeps the energy difference between the initial and proposed states small, which maintains reasonable acceptance rates.
+In HMC, simulating continuous Hamiltonian dynamics requires a numerical integration function. The leapfrog integrator is preferred because it is both volume preserving and time reversible. These are fundamental for ensuring validity of the Metropolis-Hastings acceptance step. Additionally, the leapfrog method is numerically stable over long movements and stays true to the total Hamiltonian (energy) rather than causing it to diverge over time. This stability keeps the energy difference between the initial and proposed states small, which maintains reasonable acceptance rates.
 
-Time-reversibility is achieved via perfectly symmetric half-steps of momentum in the leapfrog integrator, combined with a manual momentum flip at the end of the trajectory. Reversibility is crucial because it helps maintain detailed balance within the Markov chain. To ensure the stationary distribution of the Markov chain converges to the exact target distribution, the probability of traversing a given path forwards must precisely balance the probability of traversing it backwards. The leapfrog method and the momentum reversal guarantee this fundamental property.
-
-\section{Conclusion}
-
-Hamiltonian Monte Carlo represents a significant improvement over simple random-walk Metropolis-Hastings by utilizing gradient information and auxiliary momentum to propose new states. Our 1D implementation demonstrates that HMC can reliably and efficiently sample from a standard normal distribution. We observed that smaller leapfrog steps yield more accurate energy conservation and higher acceptance rates ($99.42\%$ at $\epsilon = 0.25$), whereas larger steps increase integration error and moderately reduce acceptance ($95.78\%$ at $\epsilon = 0.8$). Ultimately, HMC's use of Hamiltonian trajectories makes it a robust algorithm for navigating high-dimensional and strongly correlated probability spaces.
+Time-reversibility helps maintain detailed balance within the Markov chain. The probability of traversing a given path forwards must balance the probability of traversing backwards. The leapfrog method and the time reversal guarantee this fundamental property.
 
 \section*{Appendix: Python Source Code}
 % The code listing formatting is handled by the lstset block 
 \lstinputlisting[language=Python, caption=Python implementation of HMC (tutorial7\_hmc.py)]{tutorial7_hmc.py}
 
-\vspace{1em}
 
-\lstinputlisting[language=Python, caption=Figure Generation Script (generate\_figures.py)]{generate_figures.py}
 \end{document}
